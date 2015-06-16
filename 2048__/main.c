@@ -11,11 +11,14 @@ int main(){
         return 0;
     }
 
+
 }
 int criaTabuleiro(Tabuleiro* jogo){
     int i;
     //Define o tamanho do tabuleiro
     jogo->tamanho = 4;
+
+    //Cria as colunas do tabuleiro
     jogo->matriz = (int**) malloc(jogo->tamanho * sizeof(int*));
 
     if(jogo->matriz == NULL){
