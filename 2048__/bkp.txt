@@ -1,0 +1,25 @@
+/*
+    inicioH = GetTickCount();
+    if(criaTabuleiro(&tabuleiro) == -1){
+        printf("erro ao criar tabuleiro");
+        return 0;
+    }
+    colocaPeca(&tabuleiro);
+    imprimeTabuleiro(&tabuleiro);
+
+    while(1){
+
+        /*scanf("%d", &lado);
+        change = mudaPosicao(&tabuleiro, lado);
+        if( change == 0){
+            fimH = GetTickCount();
+            time = (fimH-inicioH)/1000;
+            printf("Fim do jogo\n Tempo:  %d\n Movimento: %d",time, tabuleiro.movimentos);
+            break;
+        }else if(change == -3){
+            printf("não há mais movimento");
+            break;
+        }
+
+
+    }*/

@@ -1,7 +1,9 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<windows.h>
-#define MAX tabuleiro->tamanho -1
+#include<SDL.h>
+#include<SDL_image.h>
+#include"jogo.h"
 /*
     Autores:
         Samuel de Oliveira Gamito,9266452
@@ -12,44 +14,103 @@
     i,y -> linha da matriz
     j,x -> coluns da matriz
 ****************************/
-typedef struct{
-    int tamanho, **matriz, movimentos;
-}Jogo;
-typedef struct{
-    char linkPeca[100];
-    int valorPeca;
-}Peca;
 
-int main(){
+
+int main(int argc, char **argv){
     Jogo tabuleiro;
-    int lado, change, inicioH,fimH,time;
-    inicioH = GetTickCount();
-    if(criaTabuleiro(&tabuleiro) == -1){
-        printf("erro ao criar tabuleiro");
-        return 0;
+    int lado, change, inicioH,fimH,time, running = 1;
+    SDL_Surface *homeBg;
+    SDL_Surface *screen;
+    SDL_Point mousePos;
+    SDL_Rect iniciar;
+        iniciar.x =50;
+        iniciar.y =110;
+        iniciar.h =111;
+        iniciar.w =110;
+    SDL_Rect score;
+        score.x =277;
+        score.y =129;
+        score.h =111;
+        score.w =110;
+    SDL_Rect retomar;
+        retomar.x =135;
+        retomar.y =274;
+        retomar.h =111;
+        retomar.w =110;
+    //Iniciando modo de video.
+    if(SDL_Init(SDL_INIT_EVERYTHING) < 0)
+    {
+        SDL_Log("Can't init %s", SDL_GetError());
+        return 1;
     }
-    tabuleiro.matriz[0][0] = 1024;
-    tabuleiro.matriz[0][1] = 1024;
+    //Criação da janela
+    SDL_Window *window = SDL_CreateWindow("2048 - Menu", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 434.30, 428.15, 0);
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    screen = SDL_GetWindowSurface(window);
 
-    colocaPeca(&tabuleiro);
-    imprimeTabuleiro(&tabuleiro);
+    homeBg = SDL_LoadBMP("home.bmp"); // Carrega o background da home
+    SDL_BlitSurface(homeBg, NULL, screen, NULL); // Coloca na tela
+    SDL_FreeSurface(homeBg);
 
-    while(1){
+    //Gameloop
+    while(running == 1)
+    {
+        //Detecção de Evento
+        SDL_Event event;
+        while(SDL_PollEvent(&event))
+        {
+            switch(event.type)
+            {
+            case SDL_QUIT: //Caso o usuário peça para fechar o jogo
+                running = 0;
+                break;
+            case SDL_MOUSEBUTTONDOWN:
+                SDL_GetMouseState(                    //    Sets mouse_position to...
+                    &mousePos.x,                // ...mouse arrow coords on window
+                    &mousePos.y
+                );
+                if(event.button.button == SDL_BUTTON_LEFT){
+                    if(SDL_EnclosePoints(&mousePos,1,&iniciar, NULL)){
+                        inicioH = GetTickCount();
+                        if(criaTabuleiro(&tabuleiro) == -1){
+                            printf("erro ao criar tabuleiro");
+                            return 0;
+                        }
+                        colocaPeca(&tabuleiro);
+                        imprimeTabuleiro(&tabuleiro);
 
-        scanf("%d", &lado);
-        change = mudaPosicao(&tabuleiro, lado);
-        if( change == 0){
-            fimH = GetTickCount();
-            time = (fimH-inicioH)/1000;
-            printf("Fim do jogo\n Tempo:  %d\n Movimento: %d",time, tabuleiro.movimentos);
-            break;
-        }else if(change == -3){
-            printf("não há mais movimento");
-            break;
+                        while(1){
+
+                            scanf("%d", &lado);
+                            change = mudaPosicao(&tabuleiro, lado);
+                            if( change == 0){
+                                fimH = GetTickCount();
+                                time = (fimH-inicioH)/1000;
+                                printf("Fim do jogo\n Tempo:  %d\n Movimento: %d",time, tabuleiro.movimentos);
+                                break;
+                            }else if(change == -3){
+                                printf("não há mais movimento");
+                                break;
+                            }
+
+
+                        }
+                    }else if(SDL_EnclosePoints(&mousePos,1,&score, NULL)){
+                        SDL_Log("SCORE");
+                    }else if(SDL_EnclosePoints(&mousePos,1,&retomar, NULL)){
+                        SDL_Log("RETOMA");
+                    }
+                }
+                break;
+            }
         }
-
-
+        SDL_UpdateWindowSurface(window);
+        SDL_Delay(10); //Isso causa algo como 60 quadros por segundo.
     }
+
+    //Fechando
+    SDL_Quit();
+
     return 0;
 
 }
@@ -105,7 +166,7 @@ void imprimeTabuleiro(Jogo* tabuleiro){
         retorna -1 para o jogo continuar
         retorna -2 quando o tabulerio esta cheio e tem
             pelo menos um movimento
-        retorn -3 quando não tiver mais movimento
+        retorna -3 quando não tiver mais movimento
 *********************************************************/
 int  mudaPosicao(Jogo* tabuleiro, int lado){
     int i,j,k, atual, stop, fim, mudado = 0;
@@ -118,7 +179,7 @@ int  mudaPosicao(Jogo* tabuleiro, int lado){
     //Chama a função que gira o tabuleiro
     giraMatrizAnti(tabuleiro, lado);
     if(lado >4){
-        return;
+        return 33;//Apenas para sair da função, nada acontece
     }
 
     for(i=0; i<tabuleiro->tamanho; i++){
@@ -149,7 +210,7 @@ int  mudaPosicao(Jogo* tabuleiro, int lado){
         }
     }
 
-    giraMatrizHor(tabuleiro);//Chama a função que gira o tabuleiro e em seguida imprime
+    giraMatrizHor(tabuleiro, lado);//Chama a função que gira o tabuleiro e em seguida imprime
     fim = veMaior(tabuleiro);
     if(mudado != 0){
         tabuleiro->movimentos++;
@@ -191,7 +252,7 @@ void giraMatrizAnti(Jogo* tabuleiro, int ang){
 
 }
 void giraMatrizHor(Jogo* tabuleiro, int ang){
-     int i,j,k, suporte[tabuleiro->tamanho][tabuleiro->tamanho], fim=-1;
+     int i,j,k, suporte[tabuleiro->tamanho][tabuleiro->tamanho];
 
     for(k=ang; k>1; k--){
         for(i=0; i<tabuleiro->tamanho; i++){
@@ -243,7 +304,7 @@ int colocaPeca(Jogo* tabuleiro){
     Saida:
         retorna um numero entre 0 e 3(0<=X<=3)
 *************************************************/
-int geraNum(){
+int geraNum(void){
     int a;
     a= rand()%10;
     if(a<4){
@@ -307,4 +368,26 @@ int verificaMovimento(Jogo* tabuleiro){
     }
     return -3;
 
+}
+
+
+
+
+////Carregando imagem
+
+void DrawImage( SDL_Surface *surface, char *image_path, int x_pos, int y_pos )
+{
+   SDL_Surface *image = IMG_Load ( image_path );
+   if ( !image )
+   {
+      SDL_Log ( "IMG_Load: %s\n", IMG_GetError () );
+   }
+
+   // Draws the image on the screen:
+   SDL_Rect rcDest = { x_pos, y_pos, 0, 0 };
+   SDL_BlitSurface ( image, NULL, surface, &rcDest );
+
+   // something like SDL_UpdateRect(surface, x_pos, y_pos, image->w, image->h); is missing here
+
+   SDL_FreeSurface ( image );
 }
