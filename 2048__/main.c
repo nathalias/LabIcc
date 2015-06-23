@@ -18,10 +18,13 @@
 
 int main(int argc, char **argv){
     Jogo tabuleiro;
-    int lado, change, inicioH,fimH,time, running = 1;
+    Pecas posiPecas[4][4];
+    int change, inicioH,fimH,time, running = 1, game = 0, iniciaTab=0;
     SDL_Surface *homeBg;
+    SDL_Surface *jogoBg;
     SDL_Surface *screen;
     SDL_Point mousePos;
+
     SDL_Rect iniciar;
         iniciar.x =50;
         iniciar.y =110;
@@ -49,6 +52,7 @@ int main(int argc, char **argv){
     screen = SDL_GetWindowSurface(window);
 
     homeBg = SDL_LoadBMP("home.bmp"); // Carrega o background da home
+    jogoBg = SDL_LoadBMP("jogo.bmp"); // Carrega o background do jogo
     SDL_BlitSurface(homeBg, NULL, screen, NULL); // Coloca na tela
     SDL_FreeSurface(homeBg);
 
@@ -57,44 +61,27 @@ int main(int argc, char **argv){
     {
         //Detecção de Evento
         SDL_Event event;
-        while(SDL_PollEvent(&event))
-        {
+        while(SDL_PollEvent(&event) && game ==0){//Não quero q entre nesse loop se o jogo estiver começado
             switch(event.type)
             {
             case SDL_QUIT: //Caso o usuário peça para fechar o jogo
                 running = 0;
                 break;
             case SDL_MOUSEBUTTONDOWN:
-                SDL_GetMouseState(                    //    Sets mouse_position to...
-                    &mousePos.x,                // ...mouse arrow coords on window
-                    &mousePos.y
+                SDL_GetMouseState(                    // Define as variaveis com a posição
+                    &mousePos.x,                //Coordenadas    mouse (x)
+                    &mousePos.y                 //            do        (y)
                 );
                 if(event.button.button == SDL_BUTTON_LEFT){
+                    printf("x:%i ; y:%i\n", event.button.x, event.button.y);
                     if(SDL_EnclosePoints(&mousePos,1,&iniciar, NULL)){
-                        inicioH = GetTickCount();
-                        if(criaTabuleiro(&tabuleiro) == -1){
-                            printf("erro ao criar tabuleiro");
-                            return 0;
-                        }
-                        colocaPeca(&tabuleiro);
-                        imprimeTabuleiro(&tabuleiro);
 
-                        while(1){
+                    SDL_BlitSurface(jogoBg, NULL, screen, NULL); // Coloca na tela
+                    SDL_FreeSurface(jogoBg);
+                    SDL_UpdateWindowSurface(window);
+                    game = !game;//Inicia o jogo
 
-                            scanf("%d", &lado);
-                            change = mudaPosicao(&tabuleiro, lado);
-                            if( change == 0){
-                                fimH = GetTickCount();
-                                time = (fimH-inicioH)/1000;
-                                printf("Fim do jogo\n Tempo:  %d\n Movimento: %d",time, tabuleiro.movimentos);
-                                break;
-                            }else if(change == -3){
-                                printf("não há mais movimento");
-                                break;
-                            }
-
-
-                        }
+                        //iniciaJogo(&tabuleiro);
                     }else if(SDL_EnclosePoints(&mousePos,1,&score, NULL)){
                         SDL_Log("SCORE");
                     }else if(SDL_EnclosePoints(&mousePos,1,&retomar, NULL)){
@@ -105,7 +92,58 @@ int main(int argc, char **argv){
             }
         }
         SDL_UpdateWindowSurface(window);
-        SDL_Delay(10); //Isso causa algo como 60 quadros por segundo.
+        if(game == 1){
+            if(iniciaTab == 0){
+                if(criaTabuleiro(&tabuleiro, &posiPecas) == -1){//Cria o tabuleiro
+                        printf("erro ao criar tabuleiro");
+                        return 0;
+                }
+
+                colocaPeca(&tabuleiro);
+                imprimeTabuleiro(&tabuleiro);
+                iniciaTab = !iniciaTab;
+            }
+            const Uint8* currentKeyStates = SDL_GetKeyboardState( NULL );
+            while( SDL_PollEvent( &event ) != 0 )
+				{
+					//User requests quit
+					if( event.type == SDL_QUIT )
+					{
+                        running = 0;
+					}else if( event.type == SDL_KEYDOWN ){
+						//Select surfaces based on key press
+						switch( event.key.keysym.sym )
+						{
+							case SDLK_UP:
+                                change = mudaPosicao(&tabuleiro, CIMA);
+							break;
+
+							case SDLK_DOWN:
+                                change = mudaPosicao(&tabuleiro, BAIXO);
+							break;
+
+							case SDLK_LEFT:
+                                change = mudaPosicao(&tabuleiro, ESQUERDA);
+							break;
+
+							case SDLK_RIGHT:
+                                change = mudaPosicao(&tabuleiro, DIREITA);
+							break;
+						}
+					}
+                if( change == 0){
+                    fimH = GetTickCount();
+                    time = (fimH-inicioH)/1000;
+                    printf("Fim do jogo\n Tempo:  %d\n Movimento: %d",time, tabuleiro.movimentos);
+                    break;
+                }else if(change == -3){
+                    printf("não há mais movimento");
+                    break;
+                }
+
+
+            }
+        }; //Isso causa algo como 60 quadros por segundo.
     }
 
     //Fechando
@@ -119,8 +157,8 @@ int main(int argc, char **argv){
 /*************************************
     -Função para criar o tabuleiro
 **************************************/
-int criaTabuleiro(Jogo* tabuleiro){
-    tabuleiro->movimentos = 0;
+int criaTabuleiro(Jogo* tabuleiro, Pecas* posiPecas){
+
     int i;
     //Define o tamanho do tabuleiro
     tabuleiro->tamanho = 4;
@@ -371,23 +409,3 @@ int verificaMovimento(Jogo* tabuleiro){
 }
 
 
-
-
-////Carregando imagem
-
-void DrawImage( SDL_Surface *surface, char *image_path, int x_pos, int y_pos )
-{
-   SDL_Surface *image = IMG_Load ( image_path );
-   if ( !image )
-   {
-      SDL_Log ( "IMG_Load: %s\n", IMG_GetError () );
-   }
-
-   // Draws the image on the screen:
-   SDL_Rect rcDest = { x_pos, y_pos, 0, 0 };
-   SDL_BlitSurface ( image, NULL, surface, &rcDest );
-
-   // something like SDL_UpdateRect(surface, x_pos, y_pos, image->w, image->h); is missing here
-
-   SDL_FreeSurface ( image );
-}

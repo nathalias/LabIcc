@@ -1,14 +1,20 @@
 #ifndef JOGO_H_INCLUDED
 #define JOGO_H_INCLUDED
+
+#define ESQUERDA 1
+#define DIREITA 3
+#define CIMA 2
+#define BAIXO 4
+
 typedef struct{
     int tamanho, **matriz, movimentos;
 }Jogo;
-typedef struct{
-    char linkPeca[100];
-    int valorPeca;
-}Peca;
 
-int criaTabuleiro(Jogo* tabuleiro);
+typedef struct{
+     SDL_Rect bbox;
+     int valor;
+}Pecas;
+int criaTabuleiro(Jogo* tabuleiro, Pecas* posiPecas);
 
 void imprimeTabuleiro(Jogo* tabuleiro);
 
