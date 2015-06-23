@@ -43,9 +43,7 @@
 			<Add directory="C:\mingw_dev_lib\x86_64-w64-mingw32\lib" />
 			<Add directory="C:\mingw_dev_lib\sdl_image\lib" />
 		</Linker>
-		<Unit filename="main.c">
-			<Option compilerVar="CC" />
-		</Unit>
+		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

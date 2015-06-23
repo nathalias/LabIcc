@@ -82,7 +82,7 @@ bool loadMedia()
 	int i, j;
 
 	//Load splash image
-	gBackGround = SDL_LoadBMP( "../SDL_2048/Fundo.bmp" );
+	gBackGround = SDL_LoadBMP( "../SDL_testes/Fundo.bmp" );
 	if( gBackGround == NULL )
 	{
 		printf( "Unable to load image %s! SDL Error: %s\n", "Fundo", SDL_GetError() );
@@ -94,11 +94,11 @@ bool loadMedia()
         for (j=0; j<4; j++){
             switch (tabuleiro[i][j].valor){
                 case 2:
-                tabuleiro[i][j].img = SDL_LoadBMP("../SDL_2048/2.bmp");
+                tabuleiro[i][j].img = SDL_LoadBMP("../SDL_testes/2.bmp");
                 break;
 
                 case 0:
-                tabuleiro[i][j].img = SDL_LoadBMP("../SDL_2048/0.bmp");
+                tabuleiro[i][j].img = SDL_LoadBMP("../SDL_testes/0.bmp");
                 break;
             }
             if (tabuleiro[i][j].img == NULL && tabuleiro[i][j].valor != 0){

@@ -130,11 +130,7 @@ int main(int argc, char **argv){
                                 change = mudaPosicao(&tabuleiro, DIREITA);
 							break;
 						}
-
-
 					}
-
-
                 if( change == 0){
                     fimH = GetTickCount();
                     time = (fimH-inicioH)/1000;
