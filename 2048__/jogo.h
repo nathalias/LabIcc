@@ -5,20 +5,17 @@
 #define DIREITA 3
 #define CIMA 2
 #define BAIXO 4
+#define TBOX 1000
 
 typedef struct{
     int tamanho, **matriz, movimentos;
 }Jogo;
 
-typedef struct{
-     SDL_Rect bbox;
-     int valor;
-}Pecas;
-int criaTabuleiro(Jogo* tabuleiro, Pecas* posiPecas);
+int criaTabuleiro(Jogo* tabuleiro);
 
 void imprimeTabuleiro(Jogo* tabuleiro);
 
-int  mudaPosicao(Jogo* tabuleiro, int lado);
+int  mudaPosicao(Jogo* tabuleiro, int lado );
 
 
 void giraMatrizAnti(Jogo* tabuleiro, int ang);

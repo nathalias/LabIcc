@@ -19,15 +19,36 @@ int SDL_Init(Uint32 flags);
 int main(int argc, char **argv){
     Jogo tabuleiro;
     //Declarar variaveis aqui:
-    int change,running = 1, game = 0, iniciaTab=0;
+    int i,j,change,running = 1, game = 0, iniciaTab=0;
 
     //Criar elementos do SDL aqui:
     SDL_Surface *homeBg;
     SDL_Surface *jogoBg;
     SDL_Surface *screen;
+    SDL_Surface *sPecas[11];
     SDL_Point mousePos;
-    SDL_Window *window;
-    SDL_Renderer *renderer;
+    SDL_Rect posiPecas[4][4];
+
+    //Cria os retangulos para as peças(1 para cada posição):
+    posiPecas[0][0].x = 0;         posiPecas[0][1].x = -112;    posiPecas[0][2].x = -224;      posiPecas[0][3].x = -336;
+    posiPecas[0][0].y = 0;         posiPecas[0][1].y = 0;       posiPecas[0][2].y = 0;        posiPecas[0][3].y = 0;
+    posiPecas[0][0].h = TBOX;      posiPecas[0][1].h = TBOX;    posiPecas[0][2].h = TBOX;     posiPecas[0][3].h = TBOX;
+    posiPecas[0][0].w = TBOX;      posiPecas[0][1].w = TBOX;    posiPecas[0][2].w = TBOX;     posiPecas[0][3].w = TBOX;
+
+    posiPecas[1][0].x = 0;         posiPecas[1][1].x = -112;     posiPecas[1][2].x = -224;      posiPecas[1][3].x = -336;
+    posiPecas[1][0].y = -109;      posiPecas[1][1].y = -109;     posiPecas[1][2].y = -109;      posiPecas[1][3].y = -109;
+    posiPecas[1][0].h = TBOX;      posiPecas[1][1].h = TBOX;    posiPecas[1][2].h = TBOX;     posiPecas[1][3].h = TBOX;
+    posiPecas[1][0].w = TBOX;      posiPecas[1][1].w = TBOX;    posiPecas[1][2].w = TBOX;     posiPecas[1][3].w = TBOX;
+
+    posiPecas[2][0].x = 0;         posiPecas[2][1].x = -112;     posiPecas[2][2].x = -224;      posiPecas[2][3].x = -336;
+    posiPecas[2][0].y = -221;       posiPecas[2][1].y = -221;     posiPecas[2][2].y = -221;      posiPecas[2][3].y = -221;
+    posiPecas[2][0].h = TBOX;      posiPecas[2][1].h = TBOX;    posiPecas[2][2].h = TBOX;     posiPecas[2][3].h = TBOX;
+    posiPecas[2][0].w = TBOX;      posiPecas[2][1].w = TBOX;    posiPecas[2][2].w = TBOX;     posiPecas[2][3].w = TBOX;
+
+    posiPecas[3][0].x = 0;         posiPecas[3][1].x = -112;     posiPecas[3][2].x = -224;      posiPecas[3][3].x = -336;
+    posiPecas[3][0].y = -331;       posiPecas[3][1].y = -331;     posiPecas[3][2].y = -331;      posiPecas[3][3].y = -331;
+    posiPecas[3][0].h = TBOX;      posiPecas[3][1].h = TBOX;    posiPecas[3][2].h = TBOX;     posiPecas[3][3].h = TBOX;
+    posiPecas[3][0].w = TBOX;      posiPecas[3][1].w = TBOX;    posiPecas[3][2].w = TBOX;     posiPecas[3][3].w = TBOX;
     //Cria os retangulos das peças iniciais
     SDL_Rect iniciar;
         iniciar.x =50;
@@ -53,9 +74,22 @@ int main(int argc, char **argv){
     }
 
     //Criação da janela
-    window = SDL_CreateWindow("2048 - Menu", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 434.30, 428.15, 0);
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    SDL_Window *window = SDL_CreateWindow("2048 - Menu", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 434.30, 428.15, 0);
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     screen = SDL_GetWindowSurface(window);
+    //Carregando peças
+    sPecas[0] = SDL_LoadBMP("1.bmp");
+    sPecas[1] = SDL_LoadBMP("2.bmp");
+    sPecas[2] = SDL_LoadBMP("3.bmp");
+    sPecas[3] = SDL_LoadBMP("4.bmp");
+    sPecas[4] = SDL_LoadBMP("5.bmp");
+    sPecas[5] = SDL_LoadBMP("6.bmp");
+    sPecas[6] = SDL_LoadBMP("7.bmp");
+    sPecas[7] = SDL_LoadBMP("8.bmp");
+    sPecas[8] = SDL_LoadBMP("9.bmp");
+    sPecas[9] = SDL_LoadBMP("10.bmp");
+    sPecas[10] = SDL_LoadBMP("11.bmp");
+
     //Carregando Backgrounds
     homeBg = SDL_LoadBMP("home.bmp"); // Carrega o background da home
     jogoBg = SDL_LoadBMP("jogo.bmp"); // Carrega o background do jogo
@@ -81,6 +115,7 @@ int main(int argc, char **argv){
                     &mousePos.y                 //            do        (y)
                 );
                 if(event.button.button == SDL_BUTTON_LEFT){
+                    printf("x:%i ; y:%i\n", event.button.x, event.button.y);
                     if(SDL_EnclosePoints(&mousePos,1,&iniciar, NULL)){
 
                     SDL_BlitSurface(jogoBg, NULL, screen, NULL); // Coloca na tela
@@ -106,7 +141,7 @@ int main(int argc, char **argv){
                 }
 
                 colocaPeca(&tabuleiro);
-                imprimeTabuleiro(&tabuleiro);
+                imprimeTabuleiro(&tabuleiro, &posiPecas,sPecas, screen);
                 iniciaTab = !iniciaTab;
             }
             while( SDL_PollEvent( &event ) != 0 )
@@ -120,19 +155,19 @@ int main(int argc, char **argv){
 						switch( event.key.keysym.sym )
 						{
 							case SDLK_UP:
-                                change = mudaPosicao(&tabuleiro, CIMA);
+                                change = mudaPosicao(&tabuleiro, CIMA, &posiPecas, sPecas, screen);
 							break;
 
 							case SDLK_DOWN:
-                                change = mudaPosicao(&tabuleiro, BAIXO);
+                                change = mudaPosicao(&tabuleiro, BAIXO, &posiPecas, sPecas ,screen);
 							break;
 
 							case SDLK_LEFT:
-                                change = mudaPosicao(&tabuleiro, ESQUERDA);
+                                change = mudaPosicao(&tabuleiro, ESQUERDA, &posiPecas, sPecas, screen);
 							break;
 
 							case SDLK_RIGHT:
-                                change = mudaPosicao(&tabuleiro, DIREITA);
+                                change = mudaPosicao(&tabuleiro, DIREITA, &posiPecas, sPecas, screen);
 							break;
 						}
 					}
@@ -187,12 +222,14 @@ int criaTabuleiro(Jogo* tabuleiro){
         uma struct com as imagens carregadas
 ***************************************************/
 
-void imprimeTabuleiro(Jogo* tabuleiro){
+void imprimeTabuleiro(Jogo* tabuleiro,SDL_Rect* posiPecas[4][4], SDL_Surface* sPecas[11],SDL_Surface* screen){
     int i,j;
-    system("cls");
     for(i=0; i<tabuleiro->tamanho; i++){
         for(j=0; j<tabuleiro->tamanho; j++){
             printf(" [%d] ",tabuleiro->matriz[i][j]);
+                    SDL_BlitSurface(sPecas[0], &posiPecas[1][1], screen, NULL);
+
+
         }
     printf("\n");
     }
@@ -211,7 +248,7 @@ void imprimeTabuleiro(Jogo* tabuleiro){
             pelo menos um movimento
         retorna -3 quando não tiver mais movimento
 *********************************************************/
-int  mudaPosicao(Jogo* tabuleiro, int lado){
+int  mudaPosicao(Jogo* tabuleiro, int lado,SDL_Rect* posiPecas[4][4], SDL_Surface* sPecas[11] ,SDL_Surface* screen){
     int i,j,k, atual, stop, fim, mudado = 0;
     /*
         <- 0
@@ -261,7 +298,7 @@ int  mudaPosicao(Jogo* tabuleiro, int lado){
             fim = colocaPeca(tabuleiro);
         }
     }
-    imprimeTabuleiro(tabuleiro);
+    imprimeTabuleiro(tabuleiro, posiPecas, sPecas, screen);
     return fim;
 }
 
