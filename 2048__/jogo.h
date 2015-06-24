@@ -6,7 +6,6 @@
 #define CIMA 2
 #define BAIXO 4
 #define TBOX 1000
-
 typedef struct{
     int tamanho, **matriz, movimentos;
 }Jogo;
@@ -30,6 +29,8 @@ int geraNum(void);
 int veMaior(Jogo* tabuleiro);
 int verificaMovimento(Jogo* tabuleiro);
 
-
+bool carregaImagens(Jogo* tabuleiro);
+void atualizaTela(SDL_Surface *screen, SDL_Window *window);
+void criaPecas();
 
 #endif // JOGO_H_INCLUDED

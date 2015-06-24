@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<stdbool.h>
 #include<windows.h>
 #include<SDL.h>
 #include<SDL_image.h>
@@ -10,6 +11,15 @@
         Nathalia Dias do Santos,
 */
 
+const int SCREEN_WIDTH = 436;
+const int SCREEN_HEIGHT = 436;
+
+struct Peca {
+        int  x;
+        int  y;
+        SDL_Surface *img;
+}pecas[4][4];
+
 /****************************
     i,y -> linha da matriz
     j,x -> coluns da matriz
@@ -19,7 +29,7 @@ int SDL_Init(Uint32 flags);
 int main(int argc, char **argv){
     Jogo tabuleiro;
     //Declarar variaveis aqui:
-    int change,running = 1, game = 0, iniciaTab=0;
+    int change = 0 ,running = 1, game = 0, iniciaTab=0;
 
     //Criar elementos do SDL aqui:
     SDL_Surface *homeBg;
@@ -53,7 +63,7 @@ int main(int argc, char **argv){
     }
 
     //Criação da janela
-    window = SDL_CreateWindow("2048 - Menu", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 434.30, 428.15, 0);
+    window = SDL_CreateWindow("2048 - Menu", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     screen = SDL_GetWindowSurface(window);
     //Carregando Backgrounds
@@ -104,13 +114,15 @@ int main(int argc, char **argv){
                         printf("erro ao criar tabuleiro");
                         return 0;
                 }
+                criaPecas();
 
                 colocaPeca(&tabuleiro);
                 imprimeTabuleiro(&tabuleiro);
                 iniciaTab = !iniciaTab;
             }
+
             while( SDL_PollEvent( &event ) != 0 )
-				{
+            {
 					//User requests quit
 					if( event.type == SDL_QUIT )
 					{
@@ -135,6 +147,13 @@ int main(int argc, char **argv){
                                 change = mudaPosicao(&tabuleiro, DIREITA);
 							break;
 						}
+
+                        if (carregaImagens(&tabuleiro)){
+                            atualizaTela(screen, window);
+                        } else {
+                            printf("Erro no carregamento de imagens");
+                        }
+
 					}
                 if( change == 0){
                     printf("Fim do jogo\n Movimento: %d", tabuleiro.movimentos);
@@ -144,10 +163,8 @@ int main(int argc, char **argv){
                     break;
                     game = !game;
                 }
-
-
             }
-        };
+        }
     }
 
     //Fechando
@@ -174,13 +191,28 @@ int criaTabuleiro(Jogo* tabuleiro){
     for(i=0; i<tabuleiro->tamanho; i++){
             //Cria linhas e preenche com 0
         tabuleiro->matriz[i] = (int*) calloc(tabuleiro->tamanho, sizeof(int*));
+
         if(tabuleiro->matriz[i] == NULL){
             return -1;
         }
     }
     return 0;
 }
-
+/************************************************************
+    -Função que inicializa a matriz de Pecas, que vai controlar
+    as imagens da tela. Ao final da execução coloca as coorde-
+    nadas de cada imagens na janela, de acordo com cálculos
+    que relacionam o tamanho das peças e da janela.
+**************************************************************/
+void criaPecas() {
+    int i, j;
+    for (i=0; i<4; i++){
+        for (j=0;j<4; j++){
+            pecas[j][i].x = i*99 + i*14;
+            pecas[j][i].y = j*99 + j*14;
+        }
+    }
+}
 /***************************************************
     -Função para imprimir o tabuleiro
     Entrada:Tabuleiro, as posiçoes das peças e
@@ -198,8 +230,106 @@ void imprimeTabuleiro(Jogo* tabuleiro){
     }
 }
 
+/***************************************************
+    -Função para colocar as imagens de acordo com
+     o valor da matriz principal
+    Entrada:Tabuleiro, as posiçoes das peças
+    Saída: true, se a função conseguir carregar as imagens
+
+           false, se alguma imagens não foi carregada
+***************************************************/
+bool carregaImagens(Jogo* tabuleiro){
+    int i,j;
+    bool success = true;
+
+    for (i=0; i<4; i++){
+        for (j=0; j<4; j++){
+            switch (tabuleiro->matriz[i][j]){
+                case 0:
+                    pecas[i][j].img = SDL_LoadBMP("../2048__/0.bmp");
+                break;
+
+                case 2:
+                    pecas[i][j].img = SDL_LoadBMP("../2048__/1.bmp");
+                break;
+
+                case 4:
+                    pecas[i][j].img = SDL_LoadBMP("../2048__/2.bmp");
+                break;
+
+                case 8:
+                    pecas[i][j].img = SDL_LoadBMP("../2048__/3.bmp");
+                break;
+
+                case 16:
+                    pecas[i][j].img = SDL_LoadBMP("../2048__/4.bmp");
+                break;
+
+                case 32:
+                    pecas[i][j].img = SDL_LoadBMP("../2048__/5.bmp");
+                break;
+
+                case 64:
+                    pecas[i][j].img = SDL_LoadBMP("../2048__/6.bmp");
+                break;
+
+                case 128:
+                    pecas[i][j].img = SDL_LoadBMP("../2048__/7.bmp");
+                break;
+
+                case 256:
+                    pecas[i][j].img = SDL_LoadBMP("../2048__/8.bmp");
+                break;
+
+                case 512:
+                    pecas[i][j].img = SDL_LoadBMP("../2048__/9.bmp");
+                break;
+
+                case 1024:
+                    pecas[i][j].img = SDL_LoadBMP("../2048__/10.bmp");
+                break;
+
+                case 2048:
+                    pecas[i][j].img = SDL_LoadBMP("../2048__/5.bmp");
+                break;
+            }
+
+            if (pecas[i][j].img == NULL && tabuleiro->matriz[i][j] != 0){
+                success = false;
+                printf("A matriz está com valor %d\n",tabuleiro->matriz[i][j]);
+                printf("Não foi possível carregar a peca. Erro %s: \n",  SDL_GetError());
+            }
+        }
+    }
+    return success;
+}
 
 
+/***************************************************
+    -Função para atualizar as imagens da tela de
+    acordo com as mudanças do tabuleiro
+    Entrada: Tabuleiro
+*****************************************************/
+void atualizaTela(SDL_Surface *screen, SDL_Window *window){
+    int i, j;
+
+    SDL_Surface* jogoBg = SDL_LoadBMP("jogo.bmp"); // Carrega o background do jogo
+    SDL_BlitSurface(jogoBg, NULL, screen, NULL); // Coloca na tela
+
+    SDL_FreeSurface(jogoBg);
+
+    SDL_Rect posicao;
+    for (i=0; i<4; i++){
+        for (j=0; j<4; j++){
+            posicao.x = pecas[i][j].x;
+            posicao.y = pecas[i][j].y;
+
+            SDL_BlitSurface(pecas[i][j].img, NULL, screen, &posicao);
+            //SDL_FreeSurface(pecas[i][j].img);
+        }
+    }
+    SDL_UpdateWindowSurface(window);
+}
 
 /********************************************************
     -Função para mudar a posição dos valores da matriz
