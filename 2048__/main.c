@@ -122,6 +122,7 @@ int main(int argc, char **argv){
                 imprimeTabuleiro(&tabuleiro);//Imprime o tabuleiro
                 iniciaTab = !iniciaTab;//Finaliza a inicialização
                 if (carregaImagens(&tabuleiro, imagens)){
+                    //recuperaJogo(&tabuleiro);
                     atualizaTela(screen, window);
                 } else {
                     printf("Erro no carregamento de imagens");

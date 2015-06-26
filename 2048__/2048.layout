@@ -2,9 +2,9 @@
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Release" />
 	<File name="jogo.h" open="1" top="0" tabpos="3">
-		<Cursor position="793" topLine="12" />
+		<Cursor position="862" topLine="15" />
 	</File>
 	<File name="main.c" open="1" top="1" tabpos="2">
-		<Cursor position="3935" topLine="99" />
+		<Cursor position="4201" topLine="121" />
 	</File>
 </CodeBlocks_layout_file>
