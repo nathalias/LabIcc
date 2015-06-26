@@ -35,12 +35,13 @@ int colocaPeca(Jogo* tabuleiro);
 
 int geraNum(void);
 
-
 int veMaior(Jogo* tabuleiro);
 int verificaMovimento(Jogo* tabuleiro);
 
 bool carregaImagens(Jogo* tabuleiro,SDL_Surface* imagens[12]);
 void atualizaTela(SDL_Surface *screen, SDL_Window *window);
+void salvaJogo(Jogo* tabuleiro);
+void recuperaJogo(Jogo* tabuleiro);
 void criaPecas(SDL_Surface* imagens[12]);
 void trocaTela(SDL_Surface* tela, SDL_Surface* screen);
 void zeraTab(Jogo* tabuleiro);
