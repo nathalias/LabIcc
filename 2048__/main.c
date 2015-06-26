@@ -103,6 +103,7 @@ int main(int argc, char **argv){
                         SDL_Log("SCORE");
                     }else if(SDL_EnclosePoints(&mousePos,1,&retomar, NULL)){
                         SDL_Log("RETOMA");
+                        carregaTab = 1;
                         game = !game;
                     }
                 }
@@ -121,8 +122,10 @@ int main(int argc, char **argv){
                 colocaPeca(&tabuleiro);//Coloca a primeira peça
                 imprimeTabuleiro(&tabuleiro);//Imprime o tabuleiro
                 iniciaTab = !iniciaTab;//Finaliza a inicialização
+                if (carregaTab == 1)
+                    recuperaJogo(&tabuleiro);
+
                 if (carregaImagens(&tabuleiro, imagens)){
-                    //recuperaJogo(&tabuleiro);
                     atualizaTela(screen, window);
                 } else {
                     printf("Erro no carregamento de imagens");
@@ -199,7 +202,7 @@ void recuperaJogo(Jogo* tabuleiro){
               printf("Erro a o ler a entrada (%d,%d) da matriz\n",i,j);
               break;
             } else {
-                //Controle do que foi lido
+                //Controle no console do que foi lido
                 printf("[%d,%d] %d \n",i,j, tabuleiro->matriz[i][j]);
             }
           }
