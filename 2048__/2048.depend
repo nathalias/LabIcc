@@ -3,9 +3,10 @@
 	<stdio.h>
 	<stdlib.h>
 
-1435073501 source:c:\users\samuel\desktop\labicc\2048__\main.c
+1435283574 source:c:\users\samuel\desktop\labicc\2048__\main.c
 	<stdio.h>
 	<stdlib.h>
+	<stdbool.h>
 	<windows.h>
 	<SDL.h>
 	<SDL_image.h>
@@ -16,7 +17,7 @@
 	<SDL.h>
 	<SDL_image.h>
 
-1435073764 c:\users\samuel\desktop\labicc\2048__\jogo.h
+1435256752 c:\users\samuel\desktop\labicc\2048__\jogo.h
 
 1435288088 source:c:\users\nathália\documents\github\labicc\2048__\main.c
 	<stdio.h>

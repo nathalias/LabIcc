@@ -29,12 +29,13 @@ int SDL_Init(Uint32 flags);
 int main(int argc, char **argv){
     Jogo tabuleiro;
     //Declarar variaveis aqui:
-    int change = 0 ,running = 1, game = 0, iniciaTab=0;
+    int change = 0 ,running = 1, game = 0, iniciaTab=0, gameFinalizado=0, carregaTab=0;
 
     //Criar elementos do SDL aqui:
     SDL_Surface *homeBg;
     SDL_Surface *jogoBg;
     SDL_Surface *screen;
+    SDL_Surface *imagens[12];
     SDL_Point mousePos;
     SDL_Window *window;
     SDL_Renderer *renderer;
@@ -109,17 +110,22 @@ int main(int argc, char **argv){
             }
         }
         SDL_UpdateWindowSurface(window);
+
         if(game == 1){//A patir daque o jogo sera executado
             if(iniciaTab == 0){
-                if(criaTabuleiro(&tabuleiro) == -1){//Cria o tabuleiro
+                if(criaTabuleiro(&tabuleiro, carregaTab) == -1){//Cria o tabuleiro
                         printf("erro ao criar tabuleiro");
                         return 0;
                 }
-
-                criaPecas();
-                colocaPeca(&tabuleiro);
-                imprimeTabuleiro(&tabuleiro);
-                iniciaTab = !iniciaTab;
+                criaPecas(imagens);//Crias as peças
+                colocaPeca(&tabuleiro);//Coloca a primeira peça
+                imprimeTabuleiro(&tabuleiro);//Imprime o tabuleiro
+                iniciaTab = !iniciaTab;//Finaliza a inicialização
+                if (carregaImagens(&tabuleiro, imagens)){
+                    atualizaTela(screen, window);
+                } else {
+                    printf("Erro no carregamento de imagens");
+                }
             }
 
             while( SDL_PollEvent( &event ) != 0 )
@@ -150,25 +156,27 @@ int main(int argc, char **argv){
 							break;
 						}
 
-                        if (carregaImagens(&tabuleiro)){
+                        if (carregaImagens(&tabuleiro, imagens)){//Atualiza as imagens da tela
                             atualizaTela(screen, window);
                         } else {
                             printf("Erro no carregamento de imagens");
                         }
 
 					}
-                if( change == 0){
-                    printf("Fim do jogo\n Movimento: %d", tabuleiro.movimentos);
-                    break;
-                }else if(change == -3){
-                    printf("não há mais movimento");
-                    break;
-                    game = !game;
-                }
+
+            }
+            if( change == 0 && tabuleiro.movimentos > 0){
+                printf("Fim do jogo\n Movimento: %d", tabuleiro.movimentos);
+
+            }else if(change == -3){
+                printf("não há mais movimento");
+
+                game = !game;
             }
         }
     }
     //Fechando
+    SDL_FreeSurface(imagens);
     SDL_Quit();
 
     return 0;
@@ -223,11 +231,12 @@ void salvaJogo(Jogo* tabuleiro){
 /*************************************
     -Função para criar o tabuleiro
 **************************************/
-int criaTabuleiro(Jogo* tabuleiro){
+int criaTabuleiro(Jogo* tabuleiro, int carregaTab){
     int i;
     //Define o tamanho do tabuleiro
     tabuleiro->tamanho = 4;
-
+    //Zera os movimento
+    tabuleiro->movimentos =0;
     //Cria as colunas do tabuleiro
     tabuleiro->matriz = (int**) malloc(tabuleiro->tamanho * sizeof(int*));
 
@@ -243,6 +252,7 @@ int criaTabuleiro(Jogo* tabuleiro){
             return -1;
         }
     }
+    tabuleiro->matriz[0][0] = tabuleiro->matriz[0][1] = 1024;
     return 0;
 }
 /************************************************************
@@ -251,7 +261,7 @@ int criaTabuleiro(Jogo* tabuleiro){
     nadas de cada imagens na janela, de acordo com cálculos
     que relacionam o tamanho das peças e da janela.
 **************************************************************/
-void criaPecas() {
+void criaPecas(SDL_Surface* imagens[12]) {
     int i, j;
     for (i=0; i<4; i++){
         for (j=0;j<4; j++){
@@ -259,11 +269,23 @@ void criaPecas() {
             pecas[j][i].y = j*99 + j*14;
         }
     }
+    imagens[0] = SDL_LoadBMP("../2048__/0.bmp");
+    imagens[1] = SDL_LoadBMP("../2048__/1.bmp");
+    imagens[2] = SDL_LoadBMP("../2048__/2.bmp");
+    imagens[3] = SDL_LoadBMP("../2048__/3.bmp");
+    imagens[4] = SDL_LoadBMP("../2048__/4.bmp");
+    imagens[5] = SDL_LoadBMP("../2048__/5.bmp");
+    imagens[6] = SDL_LoadBMP("../2048__/6.bmp");
+    imagens[7] = SDL_LoadBMP("../2048__/7.bmp");
+    imagens[8] = SDL_LoadBMP("../2048__/8.bmp");
+    imagens[9] = SDL_LoadBMP("../2048__/9.bmp");
+    imagens[10] = SDL_LoadBMP("../2048__/10.bmp");
+    imagens[11] = SDL_LoadBMP("../2048__/11.bmp");
+
 }
 /***************************************************
     -Função para imprimir o tabuleiro
-    Entrada:Tabuleiro, as posiçoes das peças e
-        uma struct com as imagens carregadas
+    Entrada:Tabuleiro
 ***************************************************/
 
 void imprimeTabuleiro(Jogo* tabuleiro){
@@ -285,7 +307,7 @@ void imprimeTabuleiro(Jogo* tabuleiro){
 
            false, se alguma imagens não foi carregada
 ***************************************************/
-bool carregaImagens(Jogo* tabuleiro){
+bool carregaImagens(Jogo* tabuleiro, SDL_Surface* imagens[12]){
     int i,j;
     bool success = true;
 
@@ -293,51 +315,51 @@ bool carregaImagens(Jogo* tabuleiro){
         for (j=0; j<4; j++){
             switch (tabuleiro->matriz[i][j]){
                 case 0:
-                    pecas[i][j].img = SDL_LoadBMP("../2048__/0.bmp");
+                    pecas[i][j].img = imagens[0];
                 break;
 
                 case 2:
-                    pecas[i][j].img = SDL_LoadBMP("../2048__/1.bmp");
+                    pecas[i][j].img = imagens[1];
                 break;
 
                 case 4:
-                    pecas[i][j].img = SDL_LoadBMP("../2048__/2.bmp");
+                    pecas[i][j].img = imagens[2];
                 break;
 
                 case 8:
-                    pecas[i][j].img = SDL_LoadBMP("../2048__/3.bmp");
+                    pecas[i][j].img = imagens[3];
                 break;
 
                 case 16:
-                    pecas[i][j].img = SDL_LoadBMP("../2048__/4.bmp");
+                    pecas[i][j].img = imagens[4];
                 break;
 
                 case 32:
-                    pecas[i][j].img = SDL_LoadBMP("../2048__/5.bmp");
+                    pecas[i][j].img = imagens[5];
                 break;
 
                 case 64:
-                    pecas[i][j].img = SDL_LoadBMP("../2048__/6.bmp");
+                    pecas[i][j].img = imagens[6];
                 break;
 
                 case 128:
-                    pecas[i][j].img = SDL_LoadBMP("../2048__/7.bmp");
+                    pecas[i][j].img = imagens[7];
                 break;
 
                 case 256:
-                    pecas[i][j].img = SDL_LoadBMP("../2048__/8.bmp");
+                    pecas[i][j].img =imagens[8];
                 break;
 
                 case 512:
-                    pecas[i][j].img = SDL_LoadBMP("../2048__/9.bmp");
+                    pecas[i][j].img = imagens[9];
                 break;
 
                 case 1024:
-                    pecas[i][j].img = SDL_LoadBMP("../2048__/10.bmp");
+                    pecas[i][j].img = imagens[10];
                 break;
 
                 case 2048:
-                    pecas[i][j].img = SDL_LoadBMP("../2048__/5.bmp");
+                    pecas[i][j].img = imagens[11];
                 break;
             }
 
@@ -372,7 +394,7 @@ void atualizaTela(SDL_Surface *screen, SDL_Window *window){
             posicao.y = pecas[i][j].y;
 
             SDL_BlitSurface(pecas[i][j].img, NULL, screen, &posicao);
-            //SDL_FreeSurface(pecas[i][j].img);
+
         }
     }
     SDL_UpdateWindowSurface(window);
@@ -389,7 +411,7 @@ void atualizaTela(SDL_Surface *screen, SDL_Window *window){
         retorna -3 quando não tiver mais movimento
 *********************************************************/
 int  mudaPosicao(Jogo* tabuleiro, int lado){
-    int i,j,k, atual, stop, fim, mudado = 0;
+    int i,j,k, atual, stop, ve, mudado = 0;
     /*
         <- 0
         ^  1
@@ -430,16 +452,24 @@ int  mudaPosicao(Jogo* tabuleiro, int lado){
         }
     }
 
-    giraMatrizHor(tabuleiro, lado);//Chama a função que gira o tabuleiro e em seguida imprime
-    fim = veMaior(tabuleiro);
+    giraMatrizHor(tabuleiro, lado);//Chama a função que gira o tabuleiro
+
     if(mudado != 0){
         tabuleiro->movimentos++;
-        if(fim == -1){
-            fim = colocaPeca(tabuleiro);
+        colocaPeca(tabuleiro);
+        imprimeTabuleiro(tabuleiro);
+        if(veMaior(tabuleiro) == -1){
+           return verificaMovimento(tabuleiro);
+        }else{
+            return 0;
         }
+       /**<   fim = veMaior(tabuleiro);
+
+        if(fim == -1){
+            fim =
+        }*/
     }
-    imprimeTabuleiro(tabuleiro);
-    return fim;
+    return -1;
 }
 
 
@@ -511,11 +541,6 @@ int colocaPeca(Jogo* tabuleiro){
                 break;
             }
        }
-
-       if(i==17){
-           return verificaMovimento(tabuleiro);
-       }
-        return -1;
 }
 
 
@@ -544,15 +569,17 @@ int geraNum(void){
         retorn -1 se tds foram menor q 2048
 *********************************************/
 int veMaior(Jogo* tabuleiro){
-    int i, j, fim=-1;
+
+    int i, j;
     for(i=0; i<tabuleiro->tamanho; i++){
         for(j=0; j<tabuleiro->tamanho; j++){
             if(tabuleiro->matriz[i][j] == 2048){//Verifica se o valor maximo foi alcançado;
-                fim=0;
+                return 0;
+
             }
         }
     }
-    return fim;
+    return -1;
 }
 
 
@@ -560,13 +587,21 @@ int veMaior(Jogo* tabuleiro){
     -Função para verficar se ainda existem movimento
     Entrada:Tabulerio
     Saida:
+        retorna -1 se encontrar algum 0
         retorna -2 quando tiver movimento
         retorna -3 quando não tiver movimento
 *****************************************************/
 int verificaMovimento(Jogo* tabuleiro){
-    int i, j;
-    for(i=0;i<4; i++){
-        for(j=0;j<4; j++){
+    int i, j , m;
+    for(i=0; i<tabuleiro->tamanho; i++){
+        for(j=0; j<tabuleiro->tamanho; j++){
+            if(tabuleiro->matriz[i][j] == 0){
+                return -1;
+            }
+        }
+    }
+    for(i=0;i<tabuleiro->tamanho; i++){
+        for(j=0;j<tabuleiro->tamanho; j++){
             if(i!=3){
                 if( j!= 3){
                     if(tabuleiro->matriz[i][j] == tabuleiro->matriz[i][j+1] || tabuleiro->matriz[i][j] == tabuleiro->matriz[i+1][j]){
@@ -586,6 +621,7 @@ int verificaMovimento(Jogo* tabuleiro){
             }
         }
     }
+
     return -3;
 
 }

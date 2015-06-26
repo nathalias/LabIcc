@@ -10,7 +10,9 @@ typedef struct{
     int tamanho, **matriz, movimentos;
 }Jogo;
 
-int criaTabuleiro(Jogo* tabuleiro);
+
+
+int criaTabuleiro(Jogo* tabuleiro, int carregaTab);
 
 void imprimeTabuleiro(Jogo* tabuleiro);
 
@@ -28,10 +30,10 @@ int geraNum(void);
 int veMaior(Jogo* tabuleiro);
 int verificaMovimento(Jogo* tabuleiro);
 
-bool carregaImagens(Jogo* tabuleiro);
+bool carregaImagens(Jogo* tabuleiro,SDL_Surface* imagens[12]);
 void atualizaTela(SDL_Surface *screen, SDL_Window *window);
-void criaPecas();
 void salvaJogo(Jogo* tabuleiro);
 void recuperaJogo(Jogo* tabuleiro);
+void criaPecas(SDL_Surface* imagens[12]);
 
 #endif // JOGO_H_INCLUDED
