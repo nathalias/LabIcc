@@ -29,11 +29,13 @@ int SDL_Init(Uint32 flags);
 int main(int argc, char **argv){
     Jogo tabuleiro;
     //Declarar variaveis aqui:
-    int change = 0 ,running = 1, game = 0, iniciaTab=0, gameFinalizado=0, carregaTab=0;
+    int change = FALSE ,running = TRUE, game = FALSE, iniciaTab=FALSE, carregaTab=FALSE, win=FALSE, telaAtual = HOME;
 
     //Criar elementos do SDL aqui:
     SDL_Surface *homeBg;
     SDL_Surface *jogoBg;
+    SDL_Surface *winBg;
+    SDL_Surface *loseBg;
     SDL_Surface *screen;
     SDL_Surface *imagens[12];
     SDL_Point mousePos;
@@ -68,19 +70,22 @@ int main(int argc, char **argv){
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     screen = SDL_GetWindowSurface(window);
     //Carregando Backgrounds
-    homeBg = SDL_LoadBMP("home.bmp"); // Carrega o background da home
-    jogoBg = SDL_LoadBMP("jogo.bmp"); // Carrega o background do jogo
-    SDL_BlitSurface(homeBg, NULL, screen, NULL); // Coloca na tela
-
-    SDL_FreeSurface(homeBg);
+    homeBg = SDL_LoadBMP("home.bmp"); // Carrega o background da home (1)
+    jogoBg = SDL_LoadBMP("jogo.bmp"); // Carrega o background do jogo (2)
+    winBg = SDL_LoadBMP("win.bmp"); // Carrega o background de quando vence (3)
+    loseBg = SDL_LoadBMP("lose.bmp"); // Carrega o background de quando perde (4)
+    trocaTela(homeBg,screen);
 
 
     //Gameloop
-    while(running == 1)
+    while(running == TRUE)
     {
         //Detecção de Evento
         SDL_Event event;
-        while(SDL_PollEvent(&event) && game ==0){//Não quero q entre nesse loop se o jogo estiver começado
+        while(SDL_PollEvent(&event) && game ==0 && win == 0){//Não quero q entre nesse loop se o jogo estiver começado
+            if(telaAtual != HOME){
+                trocaTela(homeBg,screen);
+            }
             switch(event.type)
             {
             case SDL_QUIT: //Caso o usuário peça para fechar o jogo
@@ -94,9 +99,8 @@ int main(int argc, char **argv){
                 if(event.button.button == SDL_BUTTON_LEFT){
                     if(SDL_EnclosePoints(&mousePos,1,&iniciar, NULL)){
 
-                    SDL_BlitSurface(jogoBg, NULL, screen, NULL); // Coloca na tela
-                    SDL_FreeSurface(jogoBg);
-                    SDL_UpdateWindowSurface(window);
+                    trocaTela(jogoBg,screen);
+                    telaAtual = JOGO;
                     game = !game;//Inicia o jogo
 
                     }else if(SDL_EnclosePoints(&mousePos,1,&score, NULL)){
@@ -111,7 +115,8 @@ int main(int argc, char **argv){
         SDL_UpdateWindowSurface(window);
 
         if(game == 1){//A patir daque o jogo sera executado
-            if(iniciaTab == 0){
+                SDL_Delay(10);//Delay para melhorar o processamento do jogo
+            if(iniciaTab == FALSE){//Verifica se ele ja foi inicializado
                 if(criaTabuleiro(&tabuleiro, carregaTab) == -1){//Cria o tabuleiro
                         printf("erro ao criar tabuleiro");
                         return 0;
@@ -120,7 +125,18 @@ int main(int argc, char **argv){
                 criaPecas(imagens);//Crias as peças
                 colocaPeca(&tabuleiro);//Coloca a primeira peça
                 imprimeTabuleiro(&tabuleiro);//Imprime o tabuleiro
-                iniciaTab = !iniciaTab;//Finaliza a inicialização
+                iniciaTab = TRUE;//Finaliza a inicialização
+                if (carregaImagens(&tabuleiro, imagens)){
+                    atualizaTela(screen, window);
+                } else {
+                    printf("Erro no carregamento de imagens");
+                }
+            }else if(iniciaTab == ZERADO){
+                change = FALSE;
+                criaPecas(imagens);//Crias as peças
+                colocaPeca(&tabuleiro);//Coloca a primeira peça
+                imprimeTabuleiro(&tabuleiro);//Imprime o tabuleiro
+                iniciaTab = TRUE;//Finaliza a inicialização
                 if (carregaImagens(&tabuleiro, imagens)){
                     atualizaTela(screen, window);
                 } else {
@@ -139,47 +155,77 @@ int main(int argc, char **argv){
 						switch( event.key.keysym.sym )
 						{
 							case SDLK_UP:
-                                change = mudaPosicao(&tabuleiro, CIMA);
+                                change = mudaPosicao(&tabuleiro, CIMA,screen,imagens,window);
+                                SDL_Log("%d", change);
 							break;
 
 							case SDLK_DOWN:
-                                change = mudaPosicao(&tabuleiro, BAIXO);
+                                change = mudaPosicao(&tabuleiro, BAIXO,screen,imagens,window);
+                                SDL_Log("%d", change);
 							break;
 
 							case SDLK_LEFT:
-                                change = mudaPosicao(&tabuleiro, ESQUERDA);
+                                change = mudaPosicao(&tabuleiro, ESQUERDA,screen,imagens,window);
+                                SDL_Log("%d", change);
 							break;
 
 							case SDLK_RIGHT:
-                                change = mudaPosicao(&tabuleiro, DIREITA);
+                                change = mudaPosicao(&tabuleiro, DIREITA,screen,imagens,window);
+                                SDL_Log("%d", change);
 							break;
 						}
-
-                        if (carregaImagens(&tabuleiro, imagens)){//Atualiza as imagens da tela
-                            atualizaTela(screen, window);
-                        } else {
-                            printf("Erro no carregamento de imagens");
-                        }
-
 					}
 
             }
-            if( change == 0 && tabuleiro.movimentos > 0){
+            if( change == FALSE && tabuleiro.movimentos > 0){
+                SDL_Delay(600);
+                win = TRUE;
+                game = FALSE;
+                trocaTela(winBg, screen);
+                telaAtual = WIN;
                 printf("Fim do jogo\n Movimento: %d", tabuleiro.movimentos);
 
             }else if(change == -3){
+                printf("\n\n\tdeu ruim");
+                trocaTela(loseBg, screen);
+                game = FALSE;
+                win=FALSE;
+                telaAtual = LOSE;
+                zeraTab(&tabuleiro);
+                iniciaTab = ZERADO;//indica q no proximo jogo não precisa inicializar o tabuleiro mas precisa colocar as peças
                 printf("não há mais movimento");
 
-                game = !game;
             }
         }
+
     }
 
     //Fechando
-    SDL_FreeSurface(imagens);
     SDL_Quit();
 
     return 0;
+
+}
+/*************************************
+    -Função para zerar o tabuleiro e
+    criar um novo tabuleiro
+*************************************/
+void zeraTab(Jogo* tabuleiro){
+    int i,j;
+    for(i=0;i<4;i++){
+        for(j=0;j<4;j++){
+            tabuleiro->matriz[i][j] = 0;
+        }
+    }
+    tabuleiro->movimentos = 0;
+
+}
+/*************************************
+    -Função para carregar e colocar
+    telas
+*************************************/
+void trocaTela(SDL_Surface* tela, SDL_Surface* screen){
+    SDL_BlitSurface(tela, NULL, screen, NULL); // Coloca na tela
 
 }
 /*************************************
@@ -206,7 +252,7 @@ int criaTabuleiro(Jogo* tabuleiro, int carregaTab){
             return -1;
         }
     }
-    tabuleiro->matriz[0][0] = tabuleiro->matriz[0][1] = 1024;
+    //tabuleiro->matriz[0][0] = tabuleiro->matriz[0][1] = 1024;
     return 0;
 }
 /************************************************************
@@ -364,8 +410,8 @@ void atualizaTela(SDL_Surface *screen, SDL_Window *window){
             pelo menos um movimento
         retorna -3 quando não tiver mais movimento
 *********************************************************/
-int  mudaPosicao(Jogo* tabuleiro, int lado){
-    int i,j,k, atual, stop, ve, mudado = 0;
+int  mudaPosicao(Jogo* tabuleiro, int lado,SDL_Surface* screen, SDL_Surface* imagens[12], SDL_Window* window ){
+    int i,j,k, atual, stop,  mudado = 0,x;
     /*
         <- 0
         ^  1
@@ -412,8 +458,16 @@ int  mudaPosicao(Jogo* tabuleiro, int lado){
         tabuleiro->movimentos++;
         colocaPeca(tabuleiro);
         imprimeTabuleiro(tabuleiro);
+        if (carregaImagens(tabuleiro, imagens)){//Atualiza as imagens da tela
+            atualizaTela(screen, window);
+        } else {
+            printf("Erro no carregamento de imagens");
+        }
+
         if(veMaior(tabuleiro) == -1){
-           return verificaMovimento(tabuleiro);
+            x = verificaMovimento(tabuleiro);
+            printf("topx:%d\n",x);
+           return x;
         }else{
             return 0;
         }
@@ -422,8 +476,12 @@ int  mudaPosicao(Jogo* tabuleiro, int lado){
         if(fim == -1){
             fim =
         }*/
+    }else{
+        x = verificaMovimento(tabuleiro);
+        printf("topx:%d\n",x);
+        return x;
     }
-    return -1;
+    return -3;
 }
 
 
@@ -570,12 +628,13 @@ int verificaMovimento(Jogo* tabuleiro){
                 if(j != 3){
                     if(tabuleiro->matriz[i][j] == tabuleiro->matriz[i][j+1]){
                         return -2;
+
                     }
                 }
             }
         }
     }
-
+    printf("deu ruim");
     return -3;
 
 }
