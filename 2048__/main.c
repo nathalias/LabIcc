@@ -126,7 +126,8 @@ int main(int argc, char **argv){
 					//User requests quit
 					if( event.type == SDL_QUIT )
 					{
-                        running = 0;
+					    salvaJogo(&tabuleiro);
+					    running = 0;
 					}else if( event.type == SDL_KEYDOWN ){
 						//Select surfaces based on key press
 						switch( event.key.keysym.sym )
@@ -166,12 +167,30 @@ int main(int argc, char **argv){
             }
         }
     }
-
     //Fechando
     SDL_Quit();
 
     return 0;
 
+}
+void salvaJogo(Jogo* tabuleiro){
+
+    FILE *arquivo;
+    int i=0,j=0;
+
+    arquivo = fopen("jogoSalvo.txt","w");
+    if (arquivo == NULL){
+        printf("\nErro na abertura do Arquivo\n");
+        exit(0);
+    } else {
+        printf("\nEscrevendo no Arquivo...");
+        for (i=0; i<4; i++){
+            for(j=0;j<4;j++){
+                fprintf(arquivo, "%d\n", tabuleiro->matriz[i][j]);
+            }
+        }
+    }
+    fclose(arquivo);
 }
 /*************************************
     -Função para criar o tabuleiro
