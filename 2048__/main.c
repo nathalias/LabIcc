@@ -28,6 +28,7 @@ int SDL_Init(Uint32 flags);
 
 int main(int argc, char **argv){
     Jogo tabuleiro;
+    char* ranking[10];
     //Declarar variaveis aqui:
     int change = FALSE ,running = TRUE, game = FALSE, iniciaTab=FALSE, carregaTab=FALSE, win=FALSE, telaAtual = HOME;
 
@@ -193,7 +194,9 @@ int main(int argc, char **argv){
                 game = FALSE;
                 trocaTela(winBg, screen);
                 telaAtual = WIN;
+                salvaScore(&tabuleiro);
                 printf("Fim do jogo\n Movimento: %d", tabuleiro.movimentos);
+
 
             }else if(change == -3){
                 printf("\n\n\tdeu ruim");
@@ -215,6 +218,24 @@ int main(int argc, char **argv){
     return 0;
 
 }
+void salvaScore(Jogo* tabuleiro){
+    FILE* arquivo;
+    char nomeAtual[20];
+    char* aux[100];
+
+    arquivo = fopen("ranking.txt", "a");
+    if (arquivo == NULL){
+        printf("\nNão foi possível abrir o arquivo\n");
+        exit(0);
+    } else {
+        printf("\nVocê Venceu!! Digite o seu nome(max 20 caract.):\n");
+        scanf("%s", &nomeAtual);
+    }
+    //chamar a função que calcula a pontuação e passar aqui no lugar de 'movimentos'
+    fprintf(arquivo,"%s...%d\n",nomeAtual,tabuleiro->movimentos);
+    fclose(arquivo);
+}
+
 /**************************************************************
     Função para recuperar o jogo salvo no arquivo
         Entrada:Tabuleiro
