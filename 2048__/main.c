@@ -102,6 +102,7 @@ int main(int argc, char **argv){
                         SDL_Log("SCORE");
                     }else if(SDL_EnclosePoints(&mousePos,1,&retomar, NULL)){
                         SDL_Log("RETOMA");
+                        game = !game;
                     }
                 }
                 break;
@@ -114,8 +115,8 @@ int main(int argc, char **argv){
                         printf("erro ao criar tabuleiro");
                         return 0;
                 }
-                criaPecas();
 
+                criaPecas();
                 colocaPeca(&tabuleiro);
                 imprimeTabuleiro(&tabuleiro);
                 iniciaTab = !iniciaTab;
@@ -173,6 +174,31 @@ int main(int argc, char **argv){
     return 0;
 
 }
+void recuperaJogo(Jogo* tabuleiro){
+    FILE* arquivo;
+    int i, j;
+
+    arquivo = fopen("jogoSalvo.txt","r");
+    if (arquivo == NULL){
+        printf("\nErro na leitura do Arquivo\n");
+        exit(0);
+    } else {
+        printf("\nLendo arquivo...\n");
+        for(i = 0; i < 4; i++){
+          for(j = 0; j < 4; j++){
+            if( !fscanf(arquivo,"%d",&tabuleiro->matriz[i][j])){
+              printf("Erro a o ler a entrada (%d,%d) da matriz\n",i,j);
+              break;
+            } else {
+                //Controle do que foi lido
+                printf("[%d,%d] %d \n",i,j, tabuleiro->matriz[i][j]);
+            }
+          }
+
+        }
+        fclose(arquivo);
+    }
+}
 void salvaJogo(Jogo* tabuleiro){
 
     FILE *arquivo;
@@ -190,6 +216,8 @@ void salvaJogo(Jogo* tabuleiro){
             }
         }
     }
+   // fprintf(arquivo, "%d\n", tabuleiro->movimentos); //ultima linha do arquivo fica com
+                                                     //os movimentos para cáculo de pontuação
     fclose(arquivo);
 }
 /*************************************

@@ -32,4 +32,6 @@ bool carregaImagens(Jogo* tabuleiro);
 void atualizaTela(SDL_Surface *screen, SDL_Window *window);
 void criaPecas();
 void salvaJogo(Jogo* tabuleiro);
+void recuperaJogo(Jogo* tabuleiro);
+
 #endif // JOGO_H_INCLUDED
