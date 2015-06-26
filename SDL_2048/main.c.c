@@ -102,7 +102,7 @@ bool loadMedia()
                 break;
             }
             if (tabuleiro[i][j].img == NULL && tabuleiro[i][j].valor != 0){
-                printf("Não foi possível carregar a peça");
+                printf("Não foi possível carregar a peça. Erro %s: \n",  SDL_GetError());
             }
         }
     }
