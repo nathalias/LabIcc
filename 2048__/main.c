@@ -206,10 +206,13 @@ void recuperaJogo(Jogo* tabuleiro){
                 printf("[%d,%d] %d \n",i,j, tabuleiro->matriz[i][j]);
             }
           }
-
         }
-        fclose(arquivo);
+        fscanf(arquivo,"%d",&tabuleiro->movimentos);//Recupera a ultima linha do arquivo
+                                                    //com a qtde dos movimentos salvos
+        printf("\nMovimentos: %d\n",tabuleiro->movimentos);
+
     }
+    fclose(arquivo);
 }
 void salvaJogo(Jogo* tabuleiro){
 
@@ -228,8 +231,10 @@ void salvaJogo(Jogo* tabuleiro){
             }
         }
     }
-   // fprintf(arquivo, "%d\n", tabuleiro->movimentos); //ultima linha do arquivo fica com
+    fprintf(arquivo, "%d\n", tabuleiro->movimentos); //ultima linha do arquivo fica com
                                                      //os movimentos para cáculo de pontuação
+    printf("\nMovimentos: %d\n", tabuleiro->movimentos);
+
     fclose(arquivo);
 }
 /*************************************
